@@ -4,7 +4,7 @@ author: "Mohit Gupta"
 date: "September 11, 2017"
 output: 
   ioslides_presentation: 
-    widescreen: yes
+    self_contained: true
 runtime: shiny
 ---
 
@@ -49,7 +49,7 @@ A "Get Help" button displays a popup with brief help/documentation.
 - shinyapps free account to host this presentation
 - Possibly gihub to host this interactive presentation (not decided at the time of writing this doc)  
 
-Code is available at this link - `r tags$a(href="http://www.google.com", "Github.")`
+Code is available at this link - `r tags$a(href="https://github.com/mohitg456/mohitg456.github.io", "Github.")`
 
 
 ## Input Panel of The Application  
