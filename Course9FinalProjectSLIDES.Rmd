@@ -1,0 +1,94 @@
+---
+title: "Shiny App for Comparing Stock Price History"
+author: "Mohit Gupta"
+date: "September 11, 2017"
+output: 
+  ioslides_presentation: 
+    widescreen: yes
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,message = FALSE,warning = FALSE)
+```
+
+```{r startup}
+library(shiny)
+library(plotly) 
+library(quantmod)
+
+# Stock symbols that will be used 
+symbols <- c("AAPL", "MSFT", "AMZN", "NFLX", "GOOG")
+symNames<<- c("Apple","Microsoft", "Amazon", "Netflix", "Google")
+
+# Get price history from yahoo using quantmod and save. Used saved data if available.
+if (!file.exists("quantmod_prices.RData")) {
+	getSymbols(Symbols = symbols, src="yahoo")
+	ds <- data.frame(Date = index(MSFT), AAPL[,6], MSFT[,6], AMZN[,6], NFLX[,6], GOOG[,6])
+	names(ds) <- c("Date", symNames)
+	save(ds, file="quantmod_prices.RData")
+} else {
+	load("quantmod_prices.RData")
+}
+
+```
+## Description
+This shiny application allows one to select one or more stocks (out of an available list of 5) and to see their daily closing price history in an interactive fashion.  
+
+If two or more stocks are selected, one can either overlay the price history graphs on top of each other, or stack them vertically as separate graphs.  
+
+An interactive widget on the X-axis allows one to change the start and end dates of the price history shown.  
+
+A "Get Help" button displays a popup with brief help/documentation.
+
+## Tools and Features used  
+- quantmod library for fetching selected stock symbol information from Yahoo
+- shiny to build the application and interactive content in this presentation
+- plotly for the interactive graphs and for the stacked plot (plotly::subplot)
+- RMarkdown Slidy to build this presentation
+- shinyapps free account to host this presentation
+- Possibly gihub to host this interactive presentation (not decided at the time of writing this doc)  
+
+Code is available at this link - `r tags$a(href="http://www.google.com", "Github.")`
+
+
+## Input Panel of The Application  
+Here is a rough **mockup** of what the input panel looks like.  One can choose one or more stocks and choose the graph type and there is a Help button that opens a popup.
+```{r input_Panel}
+pageWithSidebar(
+	headerPanel("Tech Stoch Comparator"),
+	sidebarPanel(
+		selectInput(inputId="sel_symbols", label="Select One or More Stocks", choices=symNames, multiple=TRUE),
+		br(),br(),
+		radioButtons("stack_type", label="Stack or Overlay?", 
+					 choices=c("Stack","Overlay"), selected="Stack", inline=TRUE),
+		br(),
+		actionButton("goButton", "Go!"),
+		actionButton("help", "Show Help")
+	),
+	mainPanel(plotlyOutput(NULL))
+)
+
+
+
+```
+
+## Output  
+This is a sample generated using R & plotly code from the app but it does not accept input from the previous slide.  For demo slide deck only.  The date slide at the bottom works.  
+```{r output_Panel}
+
+sel_symbols <- c("Google", "Apple")
+
+sub_plots <- lapply(sel_symbols, function(sym) {
+	plot_ly(ds, x = ~Date, y=as.formula(paste0("~",sym))) %>%
+		add_lines(name = sym) %>% 
+		layout(
+			title = "Stock Prices",
+			xaxis = list(rangeslider = list(type = "date")),
+			yaxis = list(title = "Price (Log)")
+		)
+})
+subplot(sub_plots, nrows = length(sub_plots), shareX = TRUE, titleX = FALSE)
+p
+```
+
